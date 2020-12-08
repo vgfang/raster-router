@@ -1,0 +1,21 @@
+#banner {
+	display: grid;
+	grid-template-areas: 
+		"title    uuid"
+		"subtitle links"
+	;
+} #title {
+	grid-area: title
+} #subtitle {
+	grid-area: subtitle
+} #uuid {
+	grid-area: uuid
+} #links {
+	grid-area: links
+}
+
+body {
+	background-color: #cfcfcf;
+}
+h1 {
+}

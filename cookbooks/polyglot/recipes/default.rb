@@ -38,7 +38,12 @@ directory '/opt/installers'
 
 # Other core language tools you might want
 
-#package ['python3', 'python3-pip', 'python3-dev']  # Python
+package ['python3', 'python3-pip', 'python3-dev', 'python3-virtualenv']  # Python
+package ['swig']  # Swig
+execute 'pip install flask' do # Flask
+  action :nothing
+end
+
 #package ['ghc', 'libghc-random-dev', 'cabal-install']  # Haskell
 #package 'golang-go'  # Go
 #package 'erlang'  # Erlang

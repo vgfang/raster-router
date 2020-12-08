@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% block head %}
+	<title>Create - Raster Route</title>
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/create.css') }}">
+	<script>
+		var fid = "{{fid}}" //transfer filename from flask
+	</script>
+	<script type="text/javascript" src="{{ url_for('static', filename='js/create.js') }}"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+{% endblock %}
+
+{% block body %}
+	<h2>Create Router</h2>
+	<p id="uuid">fid: {{ fid }}</p>
+	<div id="imageContainer">
+		<div id="presContainer">
+			<h3>present: (w,h)</h3>
+			<img class="raster" id="present" src="{{ url_for('static', filename='img/default.png')}}">
+			</form>
+			<form>
+				<input type="submit" value="Return to Previous">
+			</form>
+		</div>
+		<div id="nextContainer">
+			<h3>preview: (w,h)</h3>
+
+			<img class="raster" id="next" src="{{ url_for('static', filename='img/default.png')}}">
+			<form>
+				<input type="submit" value="Continue to Next">
+			</form>
+		</div>
+
+	</div>
+	<div id="argumentsContainer">
+		Current Arguments:
+		<div id="argumentsList">
+			placeholder 1
+			placeholder 2
+			<form>
+				Argument Name:<input type="text">
+				Argument Type:
+					<select>
+						<option>text</option>
+						<option>image</option>
+						<option>shape</option>
+						<option>boolean</option>
+					</select>
+				<input type="file">
+				<textarea></textarea>
+				<input type="submit" value="Add">
+			</form>
+		</div>
+	</div>
+	<div id="commandList">
+		Commands:
+		
+		
+		<form>
+			<input type="submit" value="Add 2D Object">	
+			Type:
+			IF: 
+			<select>
+				<option>True</option>
+			</select>
+			<select>
+				<option>Shape</option>
+				<option>Text</option>
+				<option>Image</option>
+			</select>
+			Pattern:
+			<select>
+				<option>single</option>
+				<option>sin</option>
+				<option>circle</option>
+				<option>spiral</option>
+			</select>
+			Size
+			x: <input type="text">
+			y: <input type="text">
+			Location:
+			x: <input type="number">
+			y: <input type="number">
+			Spacing (px): <input type="text">
+			Color (add hex color picker later): 
+			Render Type:
+			<select>
+				<option>normal</option>
+				<option>additive</option>
+				<option>burn</option>
+			</select>
+			Location:
+			<select>
+				<option>free text</option>
+				<option>caption above image</option>
+				<option>caption on image</option>
+				<option>caption below image</option>
+			</select>
+			Font-Face:
+			<select>
+				<option>Times New Roman</option>
+				<option>Comic Sans</option>
+				<option>IBM EGA8</option>
+				<option>Impact</option>
+			</select>
+			<br>
+			Text: <textarea></textarea>
+		</form>
+		<br>
+		<form>
+			<input type="submit" value="Add Filter">
+		</form>
+		<form>
+			<input type="submit" value="Scale to size">
+			IF: 
+			<select>
+				<option>True</option>
+			</select>
+			x:<input type="text">
+			y:<input type="text">
+			method:
+			<select>
+				<option>Standard</option>
+				<option>Pixel</option>
+			</select>
+		</form>
+		<form>
+			<input type="submit" value="Crop">
+			start:<input type="text">
+			end:<input type="text">
+			x-below:<input type="text">
+			y-below:<input type="text">
+		</form>
+	</div>
+{% endblock %}
