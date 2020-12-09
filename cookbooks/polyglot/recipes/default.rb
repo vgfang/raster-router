@@ -39,7 +39,7 @@ directory '/opt/installers'
 # Other core language tools you might want
 
 package ['python3', 'python3-pip', 'python3-dev', 'python3-virtualenv']  # Python
-package ['swig']  # Swig
+package ['golang-go']  # golang
 execute 'pip install flask' do # Flask
   action :nothing
 end

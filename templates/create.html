@@ -2,36 +2,77 @@
 {% block head %}
 	<title>Create - Raster Route</title>
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/create.css') }}">
-	<script>
-		var fid = "{{fid}}" //transfer filename from flask
-	</script>
-	<script type="text/javascript" src="{{ url_for('static', filename='js/create.js') }}"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	<script>
+		var fid = "{{fid}}"; //transfer filename from flask
+		var routestring = ""; //routestring
+		function update_img(id) {
+			// give the server some time to write the new image
+			setTimeout(()=>{
+				document.getElementById(id).src = "static/img/user/"+fid+"_"+id+".png";
+			},300)
+		}
+		function update_all(){
+			update_img("pres")
+			update_img("next")
+		}
+		$(document).ready(()=>{
+			$("#blankForm").submit((e) => {
+				e.preventDefault(); //avoid normal submit
+				var form = $("#blankForm")
+				console.log("e"+form.serialize())
+				$.ajax({
+					type: "POST",
+					url: "./create/generate_blank",
+					data: form.serialize(),
+					success: (data) => {
+						console.log("blankForm success")
+						console.log(data)
+					},
+					error: (data) => {
+						console.log("blankForm error")
+						console.log(data)
+					},
+				});
+				update_all() // update images
+				$("hid").css("display", "default");
+
+			});
+			$("#refreshBtn").click((e)=>{
+				update_all()
+			});
+		});
+
+		console.log("fid: ", fid)
+	</script>
 {% endblock %}
 
 {% block body %}
 	<h2>Create Router</h2>
 	<p id="uuid">fid: {{ fid }}</p>
+	<form id="blankForm">
+		x: <input type="number" name="width"  value="600" max="1024">
+		y: <input type="number"name="height"  value="600" max="1024">
+		<input type="submit" value="Generate Blank Canvas">
+	</form>
+	
+
+
 	<div id="imageContainer">
 		<div id="presContainer">
-			<h3>present: (w,h)</h3>
-			<img class="raster" id="present" src="{{ url_for('static', filename='img/default.png')}}">
-			</form>
-			<form>
-				<input type="submit" value="Return to Previous">
-			</form>
+			<h3>present:</h3>
+			<img class="raster" id="pres" src="{{ url_for('static', filename='img/default.png')}}">
+			<button id="refreshBtn">Emergency Refresh</button>
 		</div>
 		<div id="nextContainer">
-			<h3>preview: (w,h)</h3>
+			<h3>preview:</h3>
 
 			<img class="raster" id="next" src="{{ url_for('static', filename='img/default.png')}}">
-			<form>
-				<input type="submit" value="Continue to Next">
-			</form>
+			<button id="nextBtn">Continue to Next</button>
 		</div>
 
 	</div>
-	<div id="argumentsContainer">
+	<div id="argumentsContainer" class="init-hidden">
 		Current Arguments:
 		<div id="argumentsList">
 			placeholder 1
@@ -42,19 +83,30 @@
 					<select>
 						<option>text</option>
 						<option>image</option>
-						<option>shape</option>
 						<option>boolean</option>
 					</select>
-				<input type="file">
+				Argument Value:
 				<textarea></textarea>
-				<input type="submit" value="Add">
+				<input display="hidden" type="file">
+				<input type="submit" value="Add Argument">
 			</form>
 		</div>
 	</div>
-	<div id="commandList">
+	<div id="commandList" style="display:none">
 		Commands:
-		
-		
+		<div>
+			<form id="addTextForm">
+				Text: <textarea name="intext" form="addTextForm"></textarea>
+				posx: <input name="posx" type="number" min="-10000" max="10000">
+				posy: <input name="posy" type="number" min="-10000" max="10000">
+				<select name="font">
+					<option value="impact">Impact</option>
+					<option value="impact"></option>
+				</select>
+				<input type="submit" value="Add Text to to Preview">
+			</form>
+		</div>
+	</div>
 		<form>
 			<input type="submit" value="Add 2D Object">	
 			Type:
@@ -130,5 +182,4 @@
 			x-below:<input type="text">
 			y-below:<input type="text">
 		</form>
-	</div>
 {% endblock %}
