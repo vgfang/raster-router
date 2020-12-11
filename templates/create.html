@@ -2,24 +2,77 @@
 {% block head %}
 	<title>Create - Raster Route</title>
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/create.css') }}">
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	<script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
 	<script>
 		var fid = "{{fid}}"; //transfer filename from flask
-		var routestring = ""; //routestring
+		var rs = ""; //routestring
+		var rs_add = ""; //routestring addition
+		var argString = ""; //argumentstring
+		var argNames = [];
+		var maxArgs = 3;
+		var bufferTime = 600; //time before updating images client-side
 		function update_img(id) {
 			// give the server some time to write the new image
 			setTimeout(()=>{
 				document.getElementById(id).src = "static/img/user/"+fid+"_"+id+".png";
-			},300)
+			},bufferTime)
 		}
 		function update_all(){
 			update_img("pres")
 			update_img("next")
 		}
+
+		// arguments list generation
+		function render_arguments(){
+			var argArr = argString.split("\\sn\n");
+			var htmlString = "<li><b><u>\\arg: ARGNAME: TYPE</b></u></li>";
+			for(var i=0; i<argArr.length-1; i++){
+				var argArrSub = argArr[i].split("\\s: ")
+				htmlString += "<li>"+argArrSub[0]+": "+argArrSub[1]+"</li>"
+			}
+			$("#argumentsList").html(htmlString);
+		}
+		// add to arguments
+		function add_argument(){
+			var text = String($("#argName").val());
+			if(text == "" || argNames.includes(text)){
+				alert("Same or empty argument name input.")
+				return
+			} else if (argNames.length >= maxArgs) {
+				alert("More than the maximum allowed arguments: (" + maxArgs + ").")
+				return
+			}
+			argNames.push(text)
+			argString += text + "\\s: " + $("#argSelect").val() + "\\sn\n";
+			$("#argName").val("")
+			render_arguments()
+		}
+		//parse form.serializeRoute() to proper routestring command syntax
+		function to_rs_command(type, fd){
+			var s = "\\s: "; // break for space
+			var endl = "\\sn\n"; // break for newline
+			// route commandstrings start with the type
+			var rs_comm = type + s; 
+			if(!(["draw_text","draw_shape","draw_image"].includes(type))){
+				alert("improper type string for to_rs_command()")
+			}
+			//construct the rest of the route commandstring
+			for(var i=0; i<fd.length; i++){
+				if(i == fd.length-1){ // newlines have a different symbol
+					rs_comm += `${fd[i].value}${endl}`;
+				} else{
+					rs_comm += `${fd[i].value}${s}`;
+				} 
+			}
+			console.log(rs_comm)
+			rs_add = rs_comm; // save for later, add to main routestring when user finalize step
+			return rs_comm;
+		}
 		$(document).ready(()=>{
+			// blank generation form
 			$("#blankForm").submit((e) => {
 				e.preventDefault(); //avoid normal submit
-				var form = $("#blankForm")
+				var form = $(e.currentTarget)
 				console.log("e"+form.serialize())
 				$.ajax({
 					type: "POST",
@@ -35,13 +88,66 @@
 					},
 				});
 				update_all() // update images
-				$("hid").css("display", "default");
-
+				$(".hid").css("display", "block");
+				rs = "" // reset route string
+				rs_add = "" // reset route string add
+				arguments = "" // reset arguments
+				argNames = "" // reset argnames 
+				render_arguments() // render empty arguments
 			});
+			// draw text,shape,image
+			$("#draw_text,#draw_shape,#draw_image").submit((e)=> {
+				e.preventDefault();
+				var form = $(e.currentTarget)
+				var type = form.attr('id')
+				$.ajax({
+					type: "POST",
+					url: "./create/run_command",
+					// sends a routestring command
+					data: "rs_comm=" + to_rs_command(type, form.serializeArray()),
+					success: (data) => {
+						console.log("drawForm success")
+					}, error: (data) => {
+						console.log("drawForm error")						
+					},
+				})
+				update_all() // update images
+			});
+			// emergency refresh button (in case images are generated too late)
 			$("#refreshBtn").click((e)=>{
 				update_all()
 			});
+			// button to finalize step
+			$("#nextBtn").click((e)=> {
+				$.ajax({
+					type: "POST",
+					url: "./create/move_on",
+					data: "",
+					success: (data) => {
+						console.log("move_on success")
+					}, error: (data) => {
+						console.log("move_on success")						
+					},
+				})
+				rs += rs_add // add temp command to routestring
+				update_all()
+			});
+			// buffer time
+			$("#bufferText").keyup((e)=>{
+				var val = $("#bufferText").val()
+				if(val < 120){
+					val = 300
+				} else if(val > 3000){
+					val = 3000
+				}
+				bufferTime = val
+			});
+			// argument adding button
+			$("#addArgBtn").click((e)=> {
+				add_argument($("argSelect"))
+			});
 		});
+
 
 		console.log("fid: ", fid)
 	</script>
@@ -53,7 +159,7 @@
 	<form id="blankForm">
 		x: <input type="number" name="width"  value="600" max="1024">
 		y: <input type="number"name="height"  value="600" max="1024">
-		<input type="submit" value="Generate Blank Canvas">
+		<input type="submit" value="Generate Blank Canvas"> (RESET)
 	</form>
 	
 
@@ -62,124 +168,90 @@
 		<div id="presContainer">
 			<h3>present:</h3>
 			<img class="raster" id="pres" src="{{ url_for('static', filename='img/default.png')}}">
+			<br>
 			<button id="refreshBtn">Emergency Refresh</button>
+			Buffer MS ([300,3000]): <input id="bufferText" type="number" value="600">
 		</div>
 		<div id="nextContainer">
 			<h3>preview:</h3>
-
 			<img class="raster" id="next" src="{{ url_for('static', filename='img/default.png')}}">
+			<br>
 			<button id="nextBtn">Continue to Next</button>
+			<button id="finalBtn">Finalize Route</button>
 		</div>
 
 	</div>
-	<div id="argumentsContainer" class="init-hidden">
+	<div id="argumentsContainer">
 		Current Arguments:
-		<div id="argumentsList">
-			placeholder 1
-			placeholder 2
-			<form>
-				Argument Name:<input type="text">
-				Argument Type:
-					<select>
-						<option>text</option>
-						<option>image</option>
-						<option>boolean</option>
-					</select>
-				Argument Value:
-				<textarea></textarea>
-				<input display="hidden" type="file">
-				<input type="submit" value="Add Argument">
-			</form>
+		<div id="argumentsDiv">
+			<ul id="argumentsList">
+				<li><b><u>ARGNAME: TYPE</b></u></li>
+			</ul>
+			ADD ARGUMENT:
+			Name:<input id="argName" type="text">
+			Type:
+			<select id="argSelect">
+				<option value="text">text</option>
+				<option value="img">img</option>
+			</select>
+			<button id="addArgBtn">ADD ARGUMENT</button>
 		</div>
 	</div>
-	<div id="commandList" style="display:none">
-		Commands:
+	<div id="commandList">
+		Commands: <button id="clearBtn">Clear Information</button>
 		<div>
-			<form id="addTextForm">
-				Text: <textarea name="intext" form="addTextForm"></textarea>
+			<form id="draw_text">
+				ADD TEXT:
 				posx: <input name="posx" type="number" min="-10000" max="10000">
 				posy: <input name="posy" type="number" min="-10000" max="10000">
+				Text: <textarea name="intext" form="draw_text"></textarea>
 				<select name="font">
+					<option value="arial">Arial</option>
+					<option value="cmunorm">Computer Modern</option>
+					<option value="firacode">Fira Code</option>
+					<option value="ibmeg8">IBM EGA8</option>
+					<option value="oldlondon">Old London</option>
 					<option value="impact">Impact</option>
-					<option value="impact"></option>
+					<option value="timesnewroman">Times New Roman</option>
+				fontsize: <input name="fontsize" type="number" min="0" max="1000">
+				color: <input name="color" type="text" maxlength="9">
 				</select>
-				<input type="submit" value="Add Text to to Preview">
+				<input type="submit" value="Add Text">
 			</form>
 		</div>
+		<div>
+			<form id="draw_shape">
+				ADD SHAPE:
+				posx: <input name="posx" type="number" min="-10000" max="10000">
+				posy: <input name="posy" type="number" min="-10000" max="10000">
+				shape:
+				<select name="shape">
+					<option value="rectangle">rectangle</option>
+					<option value="rounded_rect">rounded_rect</option>
+					<option value="reg_triangle">reg_triangle</option>
+					<option value="reg_pentagon">reg_pentagon</option>
+					<option value="reg_hexagon">reg_hexagon</option>
+					<option value="ellipse">elipse</option>
+				</select>
+				width: <input name="width" type="number" min="0" max="10000">
+				height: <input name="height" type="number" min="0" max="10000">
+				color: <input name="color" type="text">
+				<input type="submit" value="Add Shape">
+			</form>
+		</div>
+		<div>
+			<form id="draw_image">
+				ADD IMAGE:
+				posx: <input name="posx" type="number" min="-10000" max="10000">
+				posy: <input name="posy" type="number" min="-10000" max="10000">
+				argument name: <input name="addFile" type="text">
+				width: <input name="width" type="number" min="0" max="10000">
+				height: <input name="height" type="number" min="0" max="10000">
+				preserve-aspect: <input name="aspect" type="checkbox">
+				<input type="submit" value="Add Image">
+			</form>
+		</div>
+		* width is used for single length commands
 	</div>
-		<form>
-			<input type="submit" value="Add 2D Object">	
-			Type:
-			IF: 
-			<select>
-				<option>True</option>
-			</select>
-			<select>
-				<option>Shape</option>
-				<option>Text</option>
-				<option>Image</option>
-			</select>
-			Pattern:
-			<select>
-				<option>single</option>
-				<option>sin</option>
-				<option>circle</option>
-				<option>spiral</option>
-			</select>
-			Size
-			x: <input type="text">
-			y: <input type="text">
-			Location:
-			x: <input type="number">
-			y: <input type="number">
-			Spacing (px): <input type="text">
-			Color (add hex color picker later): 
-			Render Type:
-			<select>
-				<option>normal</option>
-				<option>additive</option>
-				<option>burn</option>
-			</select>
-			Location:
-			<select>
-				<option>free text</option>
-				<option>caption above image</option>
-				<option>caption on image</option>
-				<option>caption below image</option>
-			</select>
-			Font-Face:
-			<select>
-				<option>Times New Roman</option>
-				<option>Comic Sans</option>
-				<option>IBM EGA8</option>
-				<option>Impact</option>
-			</select>
-			<br>
-			Text: <textarea></textarea>
-		</form>
-		<br>
-		<form>
-			<input type="submit" value="Add Filter">
-		</form>
-		<form>
-			<input type="submit" value="Scale to size">
-			IF: 
-			<select>
-				<option>True</option>
-			</select>
-			x:<input type="text">
-			y:<input type="text">
-			method:
-			<select>
-				<option>Standard</option>
-				<option>Pixel</option>
-			</select>
-		</form>
-		<form>
-			<input type="submit" value="Crop">
-			start:<input type="text">
-			end:<input type="text">
-			x-below:<input type="text">
-			y-below:<input type="text">
-		</form>
+
 {% endblock %}

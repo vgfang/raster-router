@@ -69,7 +69,11 @@ extern "C" {
 #endif
 
 
+//generates a empty transparent png
+
 extern void generate_blank(GoString p0, GoInt p1, GoInt p2);
+
+extern void run_command_str(GoString p0, GoString p1, GoString p2);
 
 #ifdef __cplusplus
 }
