@@ -89,7 +89,11 @@ func draw_image(infile,outfile,posx,posy,addfile,width,height,aspect string){
 	
 	img, _ := gg.LoadPNG(infile)
 	cont := gg.NewContextForImage(img)
-	addImg, _ := gg.LoadImage(addfile)
+	addImg, err := gg.LoadImage(addfile)
+	if err != nil{
+		fmt.Println("addFile load error")
+		return
+	}
 	addCont := gg.NewContextForImage(addImg)
 	// type conversion
 	x := stoi(posx)
@@ -176,7 +180,7 @@ func run_command_str(infile string, outfile string, commandStr string) {
 
 func run_command(infile string, outfile string, c[]string) {
 	fmt.Println("running: " + c[0] + " at (" + c[1] + "," +  c[2] + ")")
-	placeholder := "argudef.png"
+	placeholder := "placeholder.png"
 	switch c[0] {
 	case "draw_text":
 		if is_arg(c[3]) { //argument used (only relevant in creation process)

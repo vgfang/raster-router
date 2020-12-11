@@ -4,6 +4,7 @@
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/create.css') }}">
 	<script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
 	<script>
+		// GLOBAL VARIABLES for client-side Routestring generation
 		var fid = "{{fid}}"; //transfer filename from flask
 		var rs = ""; //routestring
 		var rs_add = ""; //routestring addition
@@ -11,6 +12,9 @@
 		var argNames = [];
 		var maxArgs = 3;
 		var bufferTime = 600; //time before updating images client-side
+		var canvasWidth = 600;
+		var canvasHeight = 600;
+
 		function update_img(id) {
 			// give the server some time to write the new image
 			setTimeout(()=>{
@@ -21,14 +25,40 @@
 			update_img("pres")
 			update_img("next")
 		}
-
+		// return the final routestring by merging global variables
+		function finalize(){
+			var name = String($("#routeName").val());
+			var desc = String($("#routeDesc").val());
+			if(name == "" || desc == ""){
+				alert("Need Route name/resc to be non-empty.")
+			} else if(rs == "") {
+				alert("Need non-zero number of commands.")
+			} 
+			var finalRS = "";
+			//newline break, "\n" is not included because there are newlines in the `` string
+			var n = "\\sn"
+			var s = "\\s: " //space break
+			finalRS += `NAME${n}
+${name}${n}
+DESCRIPTION${n}
+${desc}
+CANVAS${n}
+${canvasWidth}${s}${canvasHeight}${n}
+ARGUMENTS${n}
+${argString}COMMANDS${n}
+${rs}
+${rs_add}
+END${n}
+`;
+			console.log(finalRS)
+		}
 		// arguments list generation
 		function render_arguments(){
 			var argArr = argString.split("\\sn\n");
-			var htmlString = "<li><b><u>\\arg: ARGNAME: TYPE</b></u></li>";
+			var htmlString = "<li><u>TYPE:<b>ARGNAME</b></u></li>";
 			for(var i=0; i<argArr.length-1; i++){
 				var argArrSub = argArr[i].split("\\s: ")
-				htmlString += "<li>"+argArrSub[0]+": "+argArrSub[1]+"</li>"
+				htmlString += "<li>"+argArrSub[1]+":<b>\\arg: "+argArrSub[0]+"</b></li>"
 			}
 			$("#argumentsList").html(htmlString);
 		}
@@ -92,8 +122,10 @@
 				rs = "" // reset route string
 				rs_add = "" // reset route string add
 				arguments = "" // reset arguments
-				argNames = "" // reset argnames 
-				render_arguments() // render empty arguments
+				argNames = [] // reset argnames 
+				$("#argumentsList").html("") // render empty arguments
+				canvasWidth = $("#canvasWidthText").val() // dimensions for routestring generation
+				canvasHeight = $("#canvasHeightText").val()
 			});
 			// draw text,shape,image
 			$("#draw_text,#draw_shape,#draw_image").submit((e)=> {
@@ -130,6 +162,7 @@
 					},
 				})
 				rs += rs_add // add temp command to routestring
+				rs_add = "" // empty temp command
 				update_all()
 			});
 			// buffer time
@@ -154,13 +187,17 @@
 {% endblock %}
 
 {% block body %}
+	<hr>
 	<h2>Create Router</h2>
-	<p id="uuid">fid: {{ fid }}</p>
+	Route Name:<input id="routeName" type="text">
+	<button id="finalBtn">Finalize Route</button><br>
+	Route Description<textarea id="routeDesc"></textarea><br>
 	<form id="blankForm">
-		x: <input type="number" name="width"  value="600" max="1024">
-		y: <input type="number"name="height"  value="600" max="1024">
+		x: <input type="number" name="width" id="canvasWidthText" value="600" max="1024">
+		y: <input type="number"name="height" id="canvasHeightText" value="600" max="1024">
 		<input type="submit" value="Generate Blank Canvas"> (RESET)
 	</form>
+	<hr>
 	
 
 
@@ -177,7 +214,6 @@
 			<img class="raster" id="next" src="{{ url_for('static', filename='img/default.png')}}">
 			<br>
 			<button id="nextBtn">Continue to Next</button>
-			<button id="finalBtn">Finalize Route</button>
 		</div>
 
 	</div>
@@ -185,15 +221,15 @@
 		Current Arguments:
 		<div id="argumentsDiv">
 			<ul id="argumentsList">
-				<li><b><u>ARGNAME: TYPE</b></u></li>
+				<li><b><u>TYPE:ARGNAME</b></u></li>
 			</ul>
 			ADD ARGUMENT:
-			Name:<input id="argName" type="text">
 			Type:
 			<select id="argSelect">
 				<option value="text">text</option>
 				<option value="img">img</option>
 			</select>
+			Name:<input id="argName" type="text">
 			<button id="addArgBtn">ADD ARGUMENT</button>
 		</div>
 	</div>
@@ -247,11 +283,16 @@
 				argument name: <input name="addFile" type="text">
 				width: <input name="width" type="number" min="0" max="10000">
 				height: <input name="height" type="number" min="0" max="10000">
-				preserve-aspect: <input name="aspect" type="checkbox">
+				preserve-aspect:
+				<select name="aspect">
+					<option value="true">True</option>
+					<option value="false">False</option>
+				</select>
 				<input type="submit" value="Add Image">
 			</form>
 		</div>
-		* width is used for single length commands
+		* width is used for single length commands<br>
+		To use an argument, COPY EXACTLY the bolded argname listed under "Current Arguments:" into either the "Text:" field under "ADD TEXT" or the "Argument Name:" field under "ADD IMAGE".
 	</div>
 
 {% endblock %}

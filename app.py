@@ -1,16 +1,25 @@
-from flask import Flask, render_template, url_for, request, make_response, after_this_request, redirect
+from flask import Flask, render_template, url_for, request, make_response, after_this_request, redirect, flash
 import ctypes as ct # foreign function library
 import uuid # for filename unique id
 import os # for file deleting
 import shutil  # for file copying
 
 app = Flask(__name__)
-app.config['SQLAlLCHEMY_DATABASE_URL'] = "sqlite:///test.db"
+ALLOWED_IMG_EXTENSIONS = {'png','jpeg','jpg'}
+ALLOWED_ROUTE_EXTENSIONS = {'route'}
 
 imgproc = ct.cdll.LoadLibrary('./imgproc.so') # golang functions via shared libary
 tempDir = "./static/img/user/"
 class GoString(ct.Structure): # structure for calling golang string
     _fields_ = [("p", ct.c_char_p), ("n", ct.c_longlong)]
+
+# taken from Flask fileupload site
+def allowed_file(filename, version):
+	if version == "route":
+		return '.' in filename and \
+			filename.rsplit('.',1)[1].lower() in ALLOWED_ROUTE_EXTENSIONS
+	return '.' in filename and \
+		filename.rsplit('.',1)[1].lower() in ALLOWED_IMG_EXTENSIONS
 
 # set unique cookie id for filename before every page
 @app.before_request
@@ -79,18 +88,38 @@ def run_command():
 	suffix2 = "_next.png"
 	fpath1 = (tempDir + fid + suffix1).encode()
 	fpath2 = (tempDir + fid + suffix2).encode()
-	fpath1_g = GoString(fpath1, len(fpath1)) # generating two instead of copying
+	fpath1_g = GoString(fpath1, len(fpath1))
 	fpath2_g = GoString(fpath2, len(fpath2))
 	rs_commGstr = GoString(rs_comm.encode(), len(rs_comm.encode()))
-
+	# call function with "_pres" as input, "_next" as output
 	imgproc.run_command_str.argtypes = [GoString, GoString, GoString]
 	imgproc.run_command_str(fpath1_g, fpath2_g, rs_commGstr)
-
+	print(rs_comm.encode())
 	return "Successful Draw Command Next Generation."
 
-@app.route('/create/new_argimg', methods=['POST'])
-def new_argimg():
-	return "none"
+# after uploading route file
+@app.route('/route', methods=['POST'])
+def show_route():
+	if 'routeFile' not in request.files:
+		flash('File not uploaded.')
+		print("fa");
+		return redirect("/")
+	routeFile = request.files['routeFile']
+	if routeFile.filename == "" or not allowed_file(routeFile.filename, "route"):
+		flash('Improper File')
+		print("da");
+		return redirect("/")
+	filepath = './static/img/user/routing/' + routeFile.filename
+	routeFile.save(filepath)
+
+	return render_template("route.html",filepath)
+
+# after uploading arguments
+@app.route('/route/result', methods=['POST'])
+def show_result():
+	return "just the image"
 
 if __name__ == "__main__":
+	app.secret_key = 'super secret key'
+	app.config['SESSION_TYPE'] = 'filesystem'
 	app.run(debug=True, host= '0.0.0.0')

@@ -5,6 +5,12 @@
 
 {% block body %}
 
-<a href="./create">Create an Image Route</a>
+<a href="./create"><h3>Create an Image Route</h3></a>
+
+Upload an image route txt to use one.
+<form action="./route" method="POST" enctype="multipart/form-data">
+	<input type="file" name="routeFile" >
+	<input type="submit" value="Use an Image Route">
+</form>
 
 {% endblock %}
