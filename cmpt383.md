@@ -3,7 +3,7 @@ Raster Router is a web application for producing templates for algorithmic image
 1. Producing and serving images made of shapes and text according to the user's commands sequentially.
 2. Producing and using human-readable templates that can be used to create images using other images and inputed text as arguments.
 
-Single Image generation on the web can be done via HTML and Javascript, but generation of many image with complex algorithms with many steps, or creating images in a single action using a template necessitates a more performant way to produce images. Raster Router can produce images quickly using shapes, text, and other images, and can produce images with or without arguments.
+Single Image generation on the web can be done via HTML and Javascript, but generation of many image with complex algorithms with many steps, or creating images in a single action using a template necessitates a more performant way to produce images. Raster Router can produce images quickly using shapes, text, and other images, and can produce images with or without arguments. In the future it can also be expanded to accept more complex arguments, such as drawing images over a sine wave, necessitating back-end image processing speed.
 
 ## Programming Languages
 It is built on the Flask web-framework, using JQuery for front-end commands, and Golang for image production. Python uses Ctypes for calling a Golang shared binary to produce raster image functions. Python uses Flask as a web-server to communicate the client-side Javascript web app, and the webapp makes many AJAX calls to call python functions to create dynamic web pages.
