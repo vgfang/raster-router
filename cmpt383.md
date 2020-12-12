@@ -19,8 +19,9 @@ It is built on the Flask web-framework, using JQuery for front-end commands, and
 ### Deployment
 - Vagrant VM and Chef are used to deploy a Virtual Machine.
 1. Create and Start the Vagrant VM `vagrant up`
-2. Start the Flask server: `cd project; python3 app.py;`
-3. The local IP will be: `192.168.33.10:5000`
+2. SSH into the Vagrant VM `vagrant ssh`
+3. Start the Flask server: `cd project; python3 app.py;`
+4. The local IP will be: `192.168.33.10:5000`
 
 ## How to Use
 ### Creating Routes

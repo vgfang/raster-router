@@ -54,6 +54,7 @@
 <ul>
 <li>Vagrant VM and Chef are used to deploy a Virtual Machine.</li>
 <li>Create and Start the Vagrant VM <code>vagrant up</code></li>
+<li>SSH into the Vagrant VM <code>vagrant ssh</code></li>
 <li>Start the Flask server: <code>cd project; python3 app.py;</code></li>
 <li>The local IP will be: <code>192.168.33.10:5000</code></li>
 </ul>
@@ -115,5 +116,6 @@ END\<span class="hljs-keyword">sn</span>
 <p>During the process of using routes, the webserver saves the uploaded RouteString file and sends the string via POST. Then the browser extracts the needed arguments, name, and description, and dynamically generates a form for uploading and choosing the suitable arguments. This means that the system can respond to any amount of arguments can be made and called because of the dynamic generation. After saving argument images to a directory using an AJAX call, the user can generate their image on the same page with another AJAX call.</p>
 <h3 id="notes-on-difficulty">Notes on Difficulty</h3>
 <p>I found that the architectural requirements to create this project was non-trivial. Two interfaces of communication and string formats had to be made so the browser and webserver and webserver and go code could pass information safely. A lot of parsing and generating different string formats was done to produce the proper results.</p>
+
 
 {% endblock %}
