@@ -1,0 +1,13 @@
+NAME\sn
+test\sn
+DESCRIPTION\sn
+test\sn
+CANVAS\sn
+600\s: 600\sn
+ARGUMENTS\sn
+the\s: text\sn
+test\s: text\sn
+123\s: img\sn
+COMMANDS\sn
+draw_image\s: 123\s: 123\s: \arg: 123\s: 123\s: 23\s: true\sn
+END\sn

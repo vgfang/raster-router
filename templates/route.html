@@ -7,6 +7,7 @@ var fid = "{{fid}}"; //transfer filename from flask
 console.log(fid)
 var routeString = `{{routeString}}`
 var argArr = [];
+var bufferTime = 3000;
 function load_data(routestr) {
 	var name = ""
 	var desc = ""
@@ -138,15 +139,15 @@ $(document).ready((e)=>{
 		setTimeout(()=>{
 			let r = Math.random().toString(36).substring(7);
 			$("#finalImg").attr("src", "./static/img/user/routing/" + fid + "_final.png?dummy="+r)
-		},3000)
+		},bufferTime)
 	});
 	// buffer time
 	$("#bufferText").keyup((e)=>{
 		var val = $("#bufferText").val()
-		if(val < 120){
-			val = 300
-		} else if(val > 3000){
+		if(val < 3000){
 			val = 3000
+		} else if(val > 30000){
+			val = 30000
 		}
 		bufferTime = val
 	});
