@@ -94,7 +94,7 @@ def run_command():
 	# call function with "_pres" as input, "_next" as output
 	imgproc.run_command_str.argtypes = [GoString, GoString, GoString]
 	imgproc.run_command_str(fpath1_g, fpath2_g, rs_commGstr)
-	print(rs_comm.encode())
+	# print(rs_comm.encode())
 	return "Successful Draw Command Next Generation."
 
 # after uploading route file
@@ -117,7 +117,7 @@ def show_route():
 	f = open(filepath)
 	fstring = f.read()
 	fstring = fstring.replace("\\","\\\\")
-	print(fstring)
+	# print(fstring)
 	return render_template("route.html",routeFile=filepath,routeString=fstring,fid=fid)
 
 # uploading image files for arguments

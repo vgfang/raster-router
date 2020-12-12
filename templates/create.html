@@ -11,7 +11,7 @@
 		var rs_add = ""; //routestring addition
 		var argString = ""; //argumentstring
 		var argNames = [];
-		var maxArgs = 3;
+		var maxArgs = 6;
 		var bufferTime = 600; //time before updating images client-side
 		var canvasWidth = 600;
 		var canvasHeight = 600;
@@ -211,7 +211,6 @@ ${rs}END${n}
 		<input type="submit" value="Generate Blank Canvas"> (RESET)
 	</form>
 	<hr>
-	
 
 
 	<div id="imageContainer">
@@ -219,19 +218,21 @@ ${rs}END${n}
 			<h3>present:</h3>
 			<img class="raster" id="pres" src="{{ url_for('static', filename='img/default.png')}}">
 			<br>
-			<button id="refreshBtn">Emergency Refresh</button>
-			Buffer MS ([300,3000]): <input id="bufferText" type="number" value="600" maxlength="4">
+			<span class="hid">
+				<button id="refreshBtn">Emergency Refresh</button>
+				Buffer Delay in ms ([300,3000]): <input id="bufferText" type="number" value="600" maxlength="4">
+			</span>
 		</div>
 		<div id="nextContainer">
 			<h3>preview:</h3>
 			<img class="raster" id="next" src="{{ url_for('static', filename='img/default.png')}}">
 			<br>
-			<button id="nextBtn">Continue to Next</button>
+			<button id="nextBtn" class="hid">Continue to Next</button>
 		</div>
 
 	</div>
 	<hr>
-	<div id="argumentsContainer">
+	<div id="argumentsContainer" class="hid">
 		<h4>Current Arguments:</h4>
 		<ul id="argumentsList">
 			<li><b><u>TYPE:ARGNAME</b></u></li>
@@ -246,67 +247,69 @@ ${rs}END${n}
 		<button id="addArgBtn">ADD ARGUMENT</button>
 	</div>
 	<hr>
-	<div id="commandList" class="hid">
-		<hr>
-		<form id="draw_text">
-			<h4>Commands:</h4>
-			ADD TEXT:
-			posx: <input name="posx" type="number" min="-10000" max="10000">
-			posy: <input name="posy" type="number" min="-10000" max="10000">
-			Text: <textarea name="intext" form="draw_text"></textarea>
-			font,fontsize:
-			<select name="font">
-				<option value="arial">Arial</option>
-				<option value="cmunorm">Computer Modern</option>
-				<option value="firacode">Fira Code</option>
-				<option value="oldlondon">Old London</option>
-				<option value="impact">Impact</option>
-				<option value="timesnewroman">Times New Roman</option>
-			</select>
-			<input name="fontsize" type="number" min="0" max="1000">
-			color: <input name="color" type="text" maxlength="9">
-			<input type="submit" value="Add Text">
-		</form>
-		<hr>
-		<form id="draw_shape">
-			ADD SHAPE:
-			posx: <input name="posx" type="number" min="-10000" max="10000">
-			posy: <input name="posy" type="number" min="-10000" max="10000">
-			shape:
-			<select name="shape">
-				<option value="rectangle">rectangle</option>
-				<option value="rounded_rect">rounded_rect</option>
-				<option value="reg_triangle">reg_triangle</option>
-				<option value="reg_pentagon">reg_pentagon</option>
-				<option value="reg_hexagon">reg_hexagon</option>
-				<option value="ellipse">elipse</option>
-			</select>
-			width: <input name="width" type="number" min="0" max="10000">
-			height: <input name="height" type="number" min="0" max="10000">
-			color: <input name="color" type="text">
-			<input type="submit" value="Add Shape">
-		</form>
-		<hr>
+	<div class="hid">
+		<div id="commandList">
+			<hr>
+			<form id="draw_text">
+				ADD TEXT:
+				posx: <input name="posx" type="number" min="-10000" max="10000">
+				posy: <input name="posy" type="number" min="-10000" max="10000">
+				Text: <textarea name="intext" form="draw_text"></textarea>
+				font,fontsize:
+				<select name="font">
+					<option value="arial">Arial</option>
+					<option value="cmunorm">Computer Modern</option>
+					<option value="firacode">Fira Code</option>
+					<option value="oldlondon">Old London</option>
+					<option value="impact">Impact</option>
+					<option value="timesnewroman">Times New Roman</option>
+				</select>
+				<input name="fontsize" type="number" min="0" max="1000">
+				color: <input name="color" type="text" maxlength="9">
+				<input type="submit" value="Add Text">
+			</form>
+			<hr>
+			<form id="draw_shape">
+				ADD SHAPE:
+				posx: <input name="posx" type="number" min="-10000" max="10000">
+				posy: <input name="posy" type="number" min="-10000" max="10000">
+				shape:
+				<select name="shape">
+					<option value="rectangle">rectangle</option>
+					<option value="rounded_rect">rounded_rect</option>
+					<option value="reg_triangle">reg_triangle</option>
+					<option value="reg_pentagon">reg_pentagon</option>
+					<option value="reg_hexagon">reg_hexagon</option>
+					<option value="ellipse">elipse</option>
+				</select>
+				width: <input name="width" type="number" min="0" max="10000">
+				height: <input name="height" type="number" min="0" max="10000">
+				color: <input name="color" type="text" maxlength="9">
+				<input type="submit" value="Add Shape">
+			</form>
+			<hr>
 
-		<form id="draw_image">
-			ADD IMAGE:
-			posx: <input name="posx" type="number" min="-10000" max="10000">
-			posy: <input name="posy" type="number" min="-10000" max="10000">
-			argname: <input name="addFile" type="text">
-			width: <input name="width" type="number" min="0" max="10000">
-			height: <input name="height" type="number" min="0" max="10000">
-			preserve-aspect:
-			<select name="aspect">
-				<option value="true">True</option>
-				<option value="false">False</option>
-			</select>
-			<input type="submit" value="Add Image">
-		</form>
-		<hr>
-		<input type="color"  value="#ffffff">
-		<h5>Notes:</h5>
-		* width is used for single length commands<br>
-		* to use an argument, COPY EXACTLY the bolded argname listed under "Current Arguments:" into either the "Text:" field under "ADD TEXT" or the "Argument Name:" field under "ADD IMAGE".<br>
-		* to change opacity, use an 8 digit hexcolor
+			<form id="draw_image">
+				ADD IMAGE:
+				posx: <input name="posx" type="number" min="-10000" max="10000">
+				posy: <input name="posy" type="number" min="-10000" max="10000">
+				Argname: <input name="addFile" type="text">
+				width: <input name="width" type="number" min="0" max="10000">
+				height: <input name="height" type="number" min="0" max="10000">
+				preserve-aspect:
+				<select name="aspect">
+					<option value="true">True</option>
+					<option value="false">False</option>
+				</select>
+				<input type="submit" value="Add Image">
+			</form>
+			<hr>
+		</div>
+	<ul>
+		<li><b>Notes:</b></li>
+		<li>HEX COLOR only. 8 digit Hex color supported for opacity (RGBA). Hash symbol is optional.</li>
+		<li>To use an argument, <b><u>copy exactly (including "\arg: ")</u></b> the bolded argname listed under "Current Arguments:" into either the "Text:" field under "ADD TEXT" or the "Argname:" field under "ADD IMAGE" depending on the type. For text, the preview text will have square brackets to indicate proper argument syntax was used (doesn't guarentee an existing argument was selected).</li>
+		<li>Height is ignored for single length commands.</li>
+	</ul>
 	</div>
 {% endblock %}

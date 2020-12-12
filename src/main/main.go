@@ -190,6 +190,7 @@ func run_command(infile string, outfile string, c[]string) {
 	case "draw_text":
 		if is_arg(c[3]) { //argument used (only relevant in creation process)
 			c[3] = "[ARG]:" + c[3][5:] //display arg name
+			fmt.Println(c[3])
 		}
 		draw_text(infile,outfile,c[1],c[2],c[3],c[4],c[5],c[6])
 	case "draw_shape":
