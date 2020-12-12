@@ -100,24 +100,68 @@ def run_command():
 # after uploading route file
 @app.route('/route', methods=['POST'])
 def show_route():
+	if not request.cookies.get('fid'):
+		return redirect("/")
+	fid = request.cookies.get('fid')
+	if "/" in fid :
+		return "Unsafe modified file ID. Could cause overwrites in other folders."
 	if 'routeFile' not in request.files:
 		flash('File not uploaded.')
-		print("fa");
 		return redirect("/")
 	routeFile = request.files['routeFile']
 	if routeFile.filename == "" or not allowed_file(routeFile.filename, "route"):
 		flash('Improper File')
-		print("da");
 		return redirect("/")
 	filepath = './static/img/user/routing/' + routeFile.filename
 	routeFile.save(filepath)
+	f = open(filepath)
+	fstring = f.read()
+	fstring = fstring.replace("\\","\\\\")
+	print(fstring)
+	return render_template("route.html",routeFile=filepath,routeString=fstring,fid=fid)
 
-	return render_template("route.html",filepath)
+# uploading image files for arguments
+@app.route('/route/upload', methods=['POST'])
+def upload_images():
+	# upload everything
+	filepath = "./static/img/user/routing/"
+	for fn in request.files:
+		file = request.files[fn]
+		if file.filename == "" or not allowed_file(file.filename, "image"):
+			print('Improper Files')
+		file.save(filepath + fn + ".png")
+		print(filepath + fn + ".png")
+	return "Files have been attempted to be uploaded."
 
 # after uploading arguments
 @app.route('/route/result', methods=['POST'])
-def show_result():
-	return "just the image"
+def get_result():
+	fid = request.cookies.get('fid')
+	if "/" in fid :
+		return "Unsafe modified file ID. Could cause overwrites in other folders."
+	
+	filepath = ("./static/img/user/routing/" + fid + "_final.png").encode()
+	routeString = request.form.get("routeString")
+	argString = request.form.get("argString")
+	argDir = "./static/img/user/routing/".encode()
+	if routeString == None or argString == None:
+		print("routeString/argString was None")
+		return
+	routeString = routeString.encode()
+	argString = argString.encode()
+
+
+	f = GoString(filepath, len(filepath))
+	rs = GoString(routeString, len(routeString))
+	argstr = GoString(argString, len(argString))
+	argdir =GoString(argDir, len(argDir))
+
+	imgproc.perform_route.argtypes = [GoString, GoString, GoString, GoString]
+	imgproc.perform_route(f,rs,argdir,argstr)
+
+	print(filepath)
+	return "Image Generation Successful"
+
 
 if __name__ == "__main__":
 	app.secret_key = 'super secret key'

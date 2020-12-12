@@ -3,6 +3,7 @@
 	<title>Create - Raster Route</title>
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/create.css') }}">
 	<script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+	<script src="{{ url_for('static', filename='js/FileSaver.js') }}"></script>
 	<script>
 		// GLOBAL VARIABLES for client-side Routestring generation
 		var fid = "{{fid}}"; //transfer filename from flask
@@ -30,9 +31,11 @@
 			var name = String($("#routeName").val());
 			var desc = String($("#routeDesc").val());
 			if(name == "" || desc == ""){
-				alert("Need Route name/resc to be non-empty.")
+				alert("Need Route name/desc to be non-empty.")
+				return
 			} else if(rs == "") {
 				alert("Need non-zero number of commands.")
+				return
 			} 
 			var finalRS = "";
 			//newline break, "\n" is not included because there are newlines in the `` string
@@ -41,16 +44,16 @@
 			finalRS += `NAME${n}
 ${name}${n}
 DESCRIPTION${n}
-${desc}
+${desc}${n}
 CANVAS${n}
 ${canvasWidth}${s}${canvasHeight}${n}
 ARGUMENTS${n}
 ${argString}COMMANDS${n}
-${rs}
-${rs_add}
-END${n}
+${rs}END${n}
 `;
 			console.log(finalRS)
+			var blob = new Blob([finalRS],{type: "text/plain;charset=utf-8"});
+			saveAs(blob, name+".route")
 		}
 		// arguments list generation
 		function render_arguments(){
@@ -121,11 +124,14 @@ END${n}
 				$(".hid").css("display", "block");
 				rs = "" // reset route string
 				rs_add = "" // reset route string add
-				arguments = "" // reset arguments
+				argString = "" // reset arguments
 				argNames = [] // reset argnames 
 				$("#argumentsList").html("") // render empty arguments
 				canvasWidth = $("#canvasWidthText").val() // dimensions for routestring generation
 				canvasHeight = $("#canvasHeightText").val()
+				setTimeout(()=>{
+					render_arguments()
+				},60)	
 			});
 			// draw text,shape,image
 			$("#draw_text,#draw_shape,#draw_image").submit((e)=> {
@@ -179,6 +185,9 @@ END${n}
 			$("#addArgBtn").click((e)=> {
 				add_argument($("argSelect"))
 			});
+			$("#finalBtn").click((e)=> {
+				finalize()
+			});
 		});
 
 
@@ -188,10 +197,12 @@ END${n}
 
 {% block body %}
 	<hr>
-	<h2>Create Router</h2>
+	<h2>Create Route</h2>
 	Route Name:<input id="routeName" type="text">
-	<button id="finalBtn">Finalize Route</button><br>
+	<button id="finalBtn">Download Route</button><br>
+	<span id="downloadFile"></span>
 	Route Description<textarea id="routeDesc"></textarea><br>
+	<d>
 	<form id="blankForm">
 		x: <input type="number" name="width" id="canvasWidthText" value="600" max="1024">
 		y: <input type="number"name="height" id="canvasHeightText" value="600" max="1024">
@@ -234,27 +245,25 @@ END${n}
 		</div>
 	</div>
 	<div id="commandList">
-		Commands: <button id="clearBtn">Clear Information</button>
-		<div>
-			<form id="draw_text">
-				ADD TEXT:
-				posx: <input name="posx" type="number" min="-10000" max="10000">
-				posy: <input name="posy" type="number" min="-10000" max="10000">
-				Text: <textarea name="intext" form="draw_text"></textarea>
-				<select name="font">
-					<option value="arial">Arial</option>
-					<option value="cmunorm">Computer Modern</option>
-					<option value="firacode">Fira Code</option>
-					<option value="ibmeg8">IBM EGA8</option>
-					<option value="oldlondon">Old London</option>
-					<option value="impact">Impact</option>
-					<option value="timesnewroman">Times New Roman</option>
-				fontsize: <input name="fontsize" type="number" min="0" max="1000">
-				color: <input name="color" type="text" maxlength="9">
-				</select>
-				<input type="submit" value="Add Text">
-			</form>
-		</div>
+		Commands:
+		<form id="draw_text">
+			ADD TEXT:
+			posx: <input name="posx" type="number" min="-10000" max="10000">
+			posy: <input name="posy" type="number" min="-10000" max="10000">
+			Text: <textarea name="intext" form="draw_text"></textarea>
+			<select name="font">
+				<option value="arial">Arial</option>
+				<option value="cmunorm">Computer Modern</option>
+				<option value="firacode">Fira Code</option>
+				<option value="ibmeg8">IBM EGA8</option>
+				<option value="oldlondon">Old London</option>
+				<option value="impact">Impact</option>
+				<option value="timesnewroman">Times New Roman</option>
+			fontsize: <input name="fontsize" type="number" min="0" max="1000">
+			color: <input name="color" type="text" maxlength="9">
+			</select>
+			<input type="submit" value="Add Text">
+		</form>
 		<div>
 			<form id="draw_shape">
 				ADD SHAPE:
@@ -293,6 +302,6 @@ END${n}
 		</div>
 		* width is used for single length commands<br>
 		To use an argument, COPY EXACTLY the bolded argname listed under "Current Arguments:" into either the "Text:" field under "ADD TEXT" or the "Argument Name:" field under "ADD IMAGE".
-	</div>
+	</table>
 
 {% endblock %}

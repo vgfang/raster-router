@@ -1,9 +1,180 @@
 {% extends 'base.html' %}
 {% block head %}
 <title>Route - Raster Route</title>
+<script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+<script>
+var fid = "{{fid}}"; //transfer filename from flask
+console.log(fid)
+var routeString = `{{routeString}}`
+var argArr = [];
+function load_data(routestr) {
+	var name = ""
+	var desc = ""
+	var canvas = ""
+	var res = routestr.split("\\sn\n")
+	var i = 0;
+	console.log(res)
+	// get name
+	for(i; i<res.length; i++) {
+		if(res[i] == "DESCRIPTION"){
+			i++;
+			break
+		}
+		if(res[i] != "NAME")
+			name = res[i]
+	}
+	// get desc
+	for(i; i<res.length; i++) {
+		if(res[i] == "CANVAS"){
+			i++;
+			break
+		}
+		desc += res[i]
+	}
+	// get canvas size
+	for(i; i<res.length; i++){
+		if(res[i] == "ARGUMENTS"){
+			i++;
+			break
+		}
+		canvas = res[i].replace("\\s: ", ",")
+	}
+
+	// get arguments
+	for(i; i<res.length; i++){
+		if(res[i] == "COMMANDS"){
+			break
+		}
+		argArr.push(res[i].split("\\s: "))
+	}
+	console.log(argArr)
+	return [name, desc, canvas, argArr]
+}
+function create_argstring(){
+	var argString = ""
+	var textboxes = document.getElementsByClassName('textin')
+	var tbindex = 0;
+	for (var i=0; i<argArr.length; i++) {
+		switch (argArr[i][1]){
+			case "img":
+				argString += `${argArr[i][0]}\\s: ${argArr[i][0]}.png\\s: ${argArr[i][1]}\\sn\n`
+				break;
+			case "text":
+				argString += `${argArr[i][0]}\\s: ${textboxes[tbindex].value}\\s: ${argArr[i][1]}\\sn\n`
+				tbindex += 1
+				break;
+		}
+	}
+	return argString
+}
+$(document).ready((e)=>{
+	var data = load_data(`{{routeString}}`)
+	var name = data[0]
+	var desc = data[1]
+	var canvas = data[2]
+	var argArr = data[3]
+	
+	// generate name html 
+	var descString = ""
+	$("#name").html(name)
+	$("#desc").html(desc)
+	$("#canvas").html(canvas)
+	
+	// generate forms
+	var argFormDiv = ""
+	var textFormDiv = ""
+	for(var i=0; i<argArr.length; i++){
+		switch (argArr[i][1]) {
+			case "img":
+				argFormDiv += argArr[i][0] + ": <input name=" + argArr[i][0] + " type='file'>"
+				break
+			case "text":
+				textFormDiv += argArr[i][0] + ": <textarea class='textin' form='textForm' name=" + argArr[i][0] + "></textarea>"
+				break
+			default:
+				alert("Argument Reading Error. Invalid File?")
+				return 
+		}
+	}
+	argFormDiv += "<br><br><input type='submit' value='Upload Argument Images'>"
+	$("#argumentForm").html(argFormDiv)
+	$("#textForm").html(textFormDiv)
+
+	// dynamic form submit
+	$("#argumentForm").submit((e)=> {
+		e.preventDefault();
+		var form = $(e.currentTarget)
+		var form_data = new FormData($("#argumentForm")[0]);
+		//console.log(form.serialize())
+		$.ajax({
+			type: "POST",
+			url: "./route/upload",
+			// sends a routestring command
+			data: form_data,
+			processData: false,  // tell jQuery not to process the data
+			contentType: false,   // tell jQuery not to set contentType
+			success: (data) => {
+				console.log("argument upload success")
+			}, error: (data) => {
+				console.log("argument upload error")						
+			},
+		})
+	});
+	// generation form submit
+	$("#genForm").submit((e)=>{
+		e.preventDefault();
+		mydata = "routeString=" + routeString + "&argString=" + create_argstring();
+		$.ajax({
+			type: "POST",
+			url: "./route/result",
+			data: mydata,
+			success: (data) => {
+				console.log("final generation success")
+			}, error: (data) => {
+				console.log("final generation error")						
+			},
+		})
+		e.stopImmediatePropagation();
+		setTimeout(()=>{
+			$("#finalImg").attr("src", "./static/img/user/routing/" + fid + "_final.png")
+		},3000)
+	});
+	// buffer time
+	$("#bufferText").keyup((e)=>{
+		var val = $("#bufferText").val()
+		if(val < 120){
+			val = 300
+		} else if(val > 3000){
+			val = 3000
+		}
+		bufferTime = val
+	});
+	console.log(create_argstring())
+});
+</script>
 {% endblock %}
 
 {% block body %}
+<h2>Route Name: <span id="name"></span></h2>
+<p>Description: <span id="desc"></span></p>
+<h3>Canvas Size: (<span id="canvas"></span>)</h3>
 
+<div id="descBox">
+</div> 
+<hr>
+<h4>Choose Image Arguments: </h4>
+<form id="argumentForm">
 
+</form>
+<hr>
+<h4>Choose Text Arguments: </h4>
+<form id="textForm">
+</form>
+<hr>
+Do this last:
+<form id="genForm">
+	<input type="submit" value="Generate Image">
+	Wait for Buffer MS ([3000,30000]): <input id="bufferText" type="number" value="3000">
+</form>
+<img id="finalImg" class="raster">
 {% endblock %}

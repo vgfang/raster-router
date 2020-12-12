@@ -59,7 +59,6 @@ func draw_shape(infile,outfile,posx,posy,shape,width,height,color string){
 	img, _ := gg.LoadPNG(infile)
 	cont := gg.NewContextForImage(img)
 	cont.SetHexColor(color)
-	fmt.Println(color)
 	// type conversion
 	x := stof(posx)
 	y := stof(posy)
@@ -90,9 +89,15 @@ func draw_image(infile,outfile,posx,posy,addfile,width,height,aspect string){
 	img, _ := gg.LoadPNG(infile)
 	cont := gg.NewContextForImage(img)
 	addImg, err := gg.LoadImage(addfile)
+	fmt.Println("addFile:" + addfile)
 	if err != nil{
 		fmt.Println("addFile load error")
-		return
+		fmt.Println(err)
+		addImg, err = gg.LoadImage("placeholder.png")
+		if err != nil{
+			fmt.Println("placeholder load error")
+			fmt.Println(err)
+		}
 	}
 	addCont := gg.NewContextForImage(addImg)
 	// type conversion
@@ -150,7 +155,7 @@ func parse_routestring(routestr string) route {
 		i++
 	}
 	for i<length {
-		if lines[i] == "END"{
+		if lines[i] == "END" || lines[i] == "\nEND"{ 
 			break
 		}
 		commArr = append(commArr, lines[i])
@@ -201,31 +206,30 @@ func run_command(infile string, outfile string, c[]string) {
 }
 
 // returns map[argname => value] from user argstr
-func parse_argstr(argstr string) map[string]string {
+func parse_argstr(argstr string) map[string][]string {
 	if argstr == "" {
 		return nil
 	}
-	m := make(map[string]string)
+	m := make(map[string][]string)
 	strs := strings.Split(argstr, "\\sn\n")
 	for _,line := range strs {
 		parts := strings.Split(line, "\\s: ")
 		if len(parts) > 1{
-			m[parts[0]] = parts[1]
+			m[parts[0]] = []string{parts[1],parts[2]}
 		}
 	}
 	return m
 }
 
 // creates the image to filename according to route string, also does the argument logic
-// export perform route
+//export perform_route
 func perform_route(filename string, routestr string, argDir string, argstr string) {
 	rt := parse_routestring(routestr)
-
 	// 1. generate blank canvas
 	generate_blank(filename, rt.dimensions[0], rt.dimensions[1])
 
 	// 2. initialize argstr
-	argmap := make(map[string]string)
+	argmap := make(map[string][]string)
 	if argstr != ""{
 		argmap = parse_argstr(argstr) 
 	}
@@ -237,7 +241,15 @@ func perform_route(filename string, routestr string, argDir string, argstr strin
 			noPrefix := c[3][6:]
 			temp, ok := argmap[noPrefix]
 			if ok { // found, replace with given argument
-				c[3] = argDir + "/" + temp
+				switch temp[1] {
+				case "img":
+					c[3] = argDir + temp[0]
+					fmt.Println("THIS:" + argDir + temp[0])
+				case "text":
+					c[3] = temp[0]
+				default:
+					c[3] = temp[0]
+				}
 			} else { // not found, change to "ERROR"
 				c[3] = "ERROR"
 				fmt.Println("map Error, perform_route()")
@@ -285,8 +297,8 @@ draw_shape\s: 100\s: 100\s: rectangle\s: 400\s: 80\s: #000124\sn
 draw_image\s: 100\s: 100\s: \arg: taka\s: 400\s: 80\s: true\sn
 END\sn
 `
-	test_argstr := `taka\s: taka.jpg\sn
-input\s: argumenttext\sn
+	test_argstr := `taka\s: taka.jpg\s: img\sn
+input\s: argumenttext \s: text\sn
 `
 
 	dir := "testing/"

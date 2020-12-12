@@ -75,6 +75,10 @@ extern void generate_blank(GoString p0, GoInt p1, GoInt p2);
 
 extern void run_command_str(GoString p0, GoString p1, GoString p2);
 
+// creates the image to filename according to route string, also does the argument logic
+
+extern void perform_route(GoString p0, GoString p1, GoString p2, GoString p3);
+
 #ifdef __cplusplus
 }
 #endif
