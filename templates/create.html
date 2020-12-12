@@ -18,8 +18,10 @@
 
 		function update_img(id) {
 			// give the server some time to write the new image
+
 			setTimeout(()=>{
-				document.getElementById(id).src = "static/img/user/"+fid+"_"+id+".png";
+				let r = Math.random().toString(36).substring(7); // prevents caching
+				document.getElementById(id).src = "static/img/user/"+fid+"_"+id+".png?dummy="+r;
 			},bufferTime)
 		}
 		function update_all(){

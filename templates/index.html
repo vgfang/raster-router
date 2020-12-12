@@ -8,7 +8,6 @@
 <hr>
 <a href="./create"><h2>Create an Image Route</h2></a>
 
-
 <hr>
 <h4>Upload an image route (.route) to generate a routed image.</h4>
 <form action="./route" method="POST" enctype="multipart/form-data">
@@ -16,6 +15,16 @@
 	<input type="submit" value="Use an Image Route">
 </form>
 <hr>
+<h4>Some samples:</h4>
+	<a href="./static/sample-routes/4panelart.route">4panelart</a> (used below)
+	<a href="./static/sample-routes/Caption.route">Caption</a>
+	<a href="./static/sample-routes/another_no_args.route">No arguments</a>
+	<a href="./static/sample-routes/noargtest.route">No arguments 2</a>
+<hr>
+<img src="./static/img/taka.png">
+<img src="./static/img/taka_edit.png">
+<hr>
+
 <p>Raster Router is a web application for producing templates for algorithmic image editing. The design goal for these templates, or <em>routes</em> is to have a black-box, functional design for creating images where the user inputs arguments (text or other images), to receive a modified image as a result. </p>
 <h2 id="programming-langauges">Programming Langauges</h2>
 <p>It is built on the Flask webframework, using JQuery for front-end commands, and Golang for image production. Ctypes is used for calling performant Golang

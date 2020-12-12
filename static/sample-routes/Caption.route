@@ -1,0 +1,14 @@
+NAME\sn
+Caption\sn
+DESCRIPTION\sn
+Sample Route to demonstrate simple caption. Upload an Image and write a caption.\sn
+CANVAS\sn
+600\s: 600\sn
+ARGUMENTS\sn
+taka\s: img\sn
+caption\s: text\sn
+COMMANDS\sn
+draw_shape\s: 0\s: 0\s: rectangle\s: 600\s: 600\s: #000000\sn
+draw_image\s: 100\s: 60\s: \arg: taka\s: 400\s: 400\s: true\sn
+draw_text\s: 120\s: 500\s: \arg: caption\s: timesnewroman\s: 30\s: #ffffff\sn
+END\sn

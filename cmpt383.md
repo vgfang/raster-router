@@ -19,18 +19,6 @@ raster image functions from Python. Python uses Flask as a webserver to communic
 2. Start the Flask server: `cd project; python3 app.py`
 3. The local IP will be: `192.168.33.10:5000`
 
-## How it works
-### Routestrings
-Routestrings (`.route`) are a custom plaintext markup format to represent all of the data needed to create a _route_. They are designed to be human readable and contain the information for a route's name, description, arguments, and commands. To make these processable with user input, three break characters had to be made. These are the newline(`\sn\n`), space(\s: ), and argument(\arg: ).
-
-During the process of creating routes, the browser client is creating a routestring in the background using Javascript. The image generation functionality is achieved though AJAX calls from Javascript to Flask, where the file manipulation is done, which calls the Golang binary to generate a new image. Lastly, Javascript updates the browser client image.
-
-### Commandstrings
-A Commandstring is a single line of plaintext which represents a single command. These can be ran sequentially and running a routestring executes a list of commands to produce the final image. These strings can be parsed by the Golang code, to call different functions and are passed from Javascript to Python to the Golang shared library.
-
-### Argumentstrings
-Argumentstrings are a plaintext file format, similar to a Routestring in syntax, which defines the user's arguments during _Image routing_. These are used provide a linking mechanism between arguments and the routestring commands.
-
 ## How to use
 ### Creating Routes
 1. The user generates a blank canvas of the size that they want.
@@ -45,4 +33,16 @@ Argumentstrings are a plaintext file format, similar to a Routestring in syntax,
 4. To give a text argument, the user can just type into a textarea element.
 5. To generate the final image, pressing the "Generate Image" button, and waiting will render the image below on the same page. 
 
+
+## How it works
+### Routestrings
+Routestrings (`.route`) are a custom plaintext markup format to represent all of the data needed to create a _route_. They are designed to be human readable and contain the information for a route's name, description, arguments, and commands. To make these processable with user input, three break characters had to be made. These are the newline(`\sn\n`), space(\s: ), and argument(\arg: ).
+
+During the process of creating routes, the browser client is creating a routestring in the background using Javascript. The image generation functionality is achieved though AJAX calls from Javascript to Flask, where the file manipulation is done, which calls the Golang binary to generate a new image. Lastly, Javascript updates the browser client image.
+
+### Commandstrings
+A Commandstring is a single line of plaintext which represents a single command. These can be ran sequentially and running a routestring executes a list of commands to produce the final image. These strings can be parsed by the Golang code, to call different functions and are passed from Javascript to Python to the Golang shared library.
+
+### Argumentstrings
+Argumentstrings are a plaintext file format, similar to a Routestring in syntax, which defines the user's arguments during _Image routing_. These are used provide a linking mechanism between arguments and the routestring commands.
 

@@ -57,10 +57,10 @@ def generate_blank():
 	fpath2 = (tempDir + fid + suffix2).encode()
 	fpath1_g = GoString(fpath1, len(fpath1)) # generating two instead of copying
 	fpath2_g = GoString(fpath2, len(fpath2))
-
 	imgproc.generate_blank.argtypes = [GoString, ct.c_longlong, ct.c_longlong]
 	imgproc.generate_blank(fpath1_g, width, height)
 	imgproc.generate_blank(fpath2_g, width, height)
+
 	return "Successful Blank Generation."
 
 

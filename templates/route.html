@@ -136,7 +136,8 @@ $(document).ready((e)=>{
 		})
 		e.stopImmediatePropagation();
 		setTimeout(()=>{
-			$("#finalImg").attr("src", "./static/img/user/routing/" + fid + "_final.png")
+			let r = Math.random().toString(36).substring(7);
+			$("#finalImg").attr("src", "./static/img/user/routing/" + fid + "_final.png?dummy="+r)
 		},3000)
 	});
 	// buffer time
