@@ -30,12 +30,10 @@
 }
 body {
 	background-color: #cfcfcf;
-	max-width: 1600px;
-	margin-left: 10%;
-	margin-right: 10%;
+	margin-left: 12%;
+	margin-right: 12%;
 }
 #container{
-	max-width: 1600px;
 	margin: auto;
 }
 input[type=number]{
