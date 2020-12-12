@@ -5,12 +5,66 @@
 
 {% block body %}
 
-<a href="./create"><h3>Create an Image Route</h3></a>
+<hr>
+<a href="./create"><h2>Create an Image Route</h2></a>
 
-Upload an image route txt to use one.
+
+<hr>
+<h4>Upload an image route (.route) to generate a routed image.</h4>
 <form action="./route" method="POST" enctype="multipart/form-data">
 	<input type="file" name="routeFile" >
 	<input type="submit" value="Use an Image Route">
 </form>
+<hr>
+<p>Raster Router is a web application for producing templates for algorithmic image editing. The design goal for these templates, or <em>routes</em> is to have a black-box, functional design for creating images where the user inputs arguments (text or other images), to receive a modified image as a result. </p>
+<h2 id="programming-langauges">Programming Langauges</h2>
+<p>It is built on the Flask webframework, using JQuery for front-end commands, and Golang for image production. Ctypes is used for calling performant Golang
+raster image functions from Python. Python uses Flask as a webserver to communicate the client-side Javascript web app.</p>
+<h3 id="external-libraries">External Libraries</h3>
+<ul>
+<li>github.com/fogleman/gg<ul>
+<li>A golang graphics library was used to provide simple image manipulation functions</li>
+</ul>
+</li>
+<li>github.com/nfnt/resize<ul>
+<li>A golang library for resizing images</li>
+</ul>
+</li>
+<li>github.com/eligrey/FileSaver.js<ul>
+<li>A Javascript file was used to handle client-side downloading of a JS string for the route creation</li>
+</ul>
+</li>
+</ul>
+<h3 id="deployment">Deployment</h3>
+<ul>
+<li>Vagrant VM and Chef are used to deploy a Virtual Machine.</li>
+<li>Create and Start the Vagrant VM</li>
+<li>Start the Flask server: <code>cd project; python3 app.py</code></li>
+<li>The local IP will be: <code>192.168.33.10:5000</code></li>
+</ul>
+<h2 id="how-it-works">How it works</h2>
+<h3 id="routestrings">Routestrings</h3>
+<p>Routestrings (<code>.route</code>) are a custom plaintext markup format to represent all of the data needed to create a <em>route</em>. They are designed to be human readable and contain the information for a route&#39;s name, description, arguments, and commands. To make these processable with user input, three break characters had to be made. These are the newline(<code>\sn\n</code>), space(\s: ), and argument(\arg: ).</p>
+<p>During the process of creating routes, the browser client is creating a routestring in the background using Javascript. The image generation functionality is achieved though AJAX calls from Javascript to Flask, where the file manipulation is done, which calls the Golang binary to generate a new image. Lastly, Javascript updates the browser client image.</p>
+<h3 id="commandstrings">Commandstrings</h3>
+<p>A Commandstring is a single line of plaintext which represents a single command. These can be ran sequentially and running a routestring executes a list of commands to produce the final image. These strings can be parsed by the Golang code, to call different functions and are passed from Javascript to Python to the Golang shared library.</p>
+<h3 id="argumentstrings">Argumentstrings</h3>
+<p>Argumentstrings are a plaintext file format, similar to a Routestring in syntax, which defines the user&#39;s arguments during <em>Image routing</em>. These are used provide a linking mechanism between arguments and the routestring commands.</p>
+<h2 id="how-to-use">How to use</h2>
+<h3 id="creating-routes">Creating Routes</h3>
+<ol>
+<li>The user generates a blank canvas of the size that they want.</li>
+<li>The user then can add arguments and commands. This is rendered in a preview image which only shows the difference of a single command. To use multiple commands, the user must sequentially write one command and continue.</li>
+<li>Arguments are used by first adding an argument, then referencing it in either the text of an <code>ADD_TEXT</code> command or the imagefile of an <code>ADD_IMAGE</code> command, using the prefix <code>\arg:</code> before the argument name.</li>
+<li>Downloading the route serves a <code>.route</code> extention Routestring. This can be used to <em>route</em> an image.</li>
+</ol>
+<h3 id="using-a-route">Using a Route</h3>
+<ol>
+<li>To use a route, the user must upload a valid Routestring file.</li>
+<li>Users are then redirected to a page where they can choose their arguments and read the route name and description. A dynamic form is generated using the Routestring&#39;s argument fields.</li>
+<li>To give an image argument, the user must upload a valid image file, then upload them to the server, using the upload button.</li>
+<li>To give a text argument, the user can just type into a textarea element.</li>
+<li>To generate the final image, pressing the &quot;Generate Image&quot; button, and waiting will render the image below on the same page. </li>
+</ol>
 
 {% endblock %}

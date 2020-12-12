@@ -186,6 +186,9 @@ func run_command_str(infile string, outfile string, commandStr string) {
 func run_command(infile string, outfile string, c[]string) {
 	fmt.Println("running: " + c[0] + " at (" + c[1] + "," +  c[2] + ")")
 	placeholder := "placeholder.png"
+	if c[1] == "0" || c[2] == "0"{
+		return
+	}
 	switch c[0] {
 	case "draw_text":
 		if is_arg(c[3]) { //argument used (only relevant in creation process)
