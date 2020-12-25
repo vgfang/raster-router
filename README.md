@@ -93,6 +93,3 @@ To move on to the next image/step, Python renames the files and Javascript refre
 
 ### Using Routes Inner workings
 During the process of using routes, the webserver saves the uploaded RouteString file and sends the string via POST. Then the browser extracts the needed arguments, name, and description, and dynamically generates a form for uploading and choosing the suitable arguments. This means that the system can respond to any amount of arguments can be made and called because of the dynamic generation. After saving argument images to a directory using an AJAX call, the user can generate their image on the same page with another AJAX call.
-
-### Notes on Difficulty
-I found that the architectural requirements to create this project was non-trivial. Two interfaces of communication and string formats had to be made so the browser and webserver and webserver and go code could pass information safely. A lot of parsing and generating different string formats was done to produce the proper results.
